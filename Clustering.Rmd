@@ -1,0 +1,370 @@
+---
+title: "Aprendizaje No Supervisado"
+author: "RLadies_Medellin"
+date: "23/11/2022"
+output: html_document
+---
+
+<style>
+h1 {
+  color: #8B008B;
+  font-size: 3.5em;
+  font-family: times;
+}
+
+h2 {
+  color: #8B008B;
+  font-size: 2.5em;
+  font-family: times;
+}
+
+h3 {
+  color: #8B008B;
+  font-size: 20pt;
+  font-family: times;
+}
+
+h4 {
+  color: #8B008B;
+  font-size: 16pt;
+  font-family: times;
+}
+  body{
+  font-size: 14pt;
+  font-family: times;
+}
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+![](Figures/Agenda.png)
+
+<div align="center">## **Diferencias entre Aprendizaje Supervisado y No Supervisado**
+
+<div align="left">Los algoritmos de aprendizaje **supervisado** basan su aprendizaje en un juego de datos de entrenamiento previamente etiquetados. Esto le permitirá al algoritmo poder “aprender” una función capaz de predecir el atributo objetivo para un juego de datos nuevo. Las dos grandes familias de algoritmos supervisados son: los algoritmos de regresión cuando el resultado a predecir es un atributo numérico y los algoritmos de clasificación cuando el resultado a predecir es un atributo categórico.
+
+
+<div align="left">Los métodos **no supervisados (unsupervised methods)** son algoritmos que basan su proceso de entrenamiento en un juego de datos sin etiquetas o clases previamente deﬁnidas.El aprendizaje no supervisado está dedicado a las tareas de agrupamiento, también llamadas clustering o segmentación, donde su objetivo es encontrar grupos similares en el conjunto de datos. Existen dos grupos principales de métodos o algoritmos de agrupamiento: los métodos jerárquicos y los métodos particionales o no jerárquicos.
+
+![](Figures/Supervisado_NoSupervisado.jpg)
+
+<div align="left">Las principales diferencias entre el aprendizaje **supervisado** y el aprendizaje **no supervisado** son las siguientes:
+
+<div align="left">- La necesidad de *datos etiquetados* en el aprendizaje automático **supervisado**.
+
+<div align="left">- El *modelo* que se utiliza para solucionar un problema. El aprendizaje automático **supervisado** generalmente se usa para clasificar datos o hacer predicciones, mientras que el aprendizaje **no supervisado** generalmente se usa para comprender las relaciones dentro de los conjuntos de datos.
+
+<div align="center">- El aprendizaje automático **supervisado** requiere muchos más *recursos* debido a la necesidad de datos etiquetados.
+
+
+<div align="center">## **Clustering**
+
+<div align="left">Clustering es un proceso similar al de *clasificación*, pero con un fundamento diferente. En el Clustering no sabes cuales categorias estas buscando, si no que intentas crear una segmentación de tus propios datos en grupos más o menos homogéneos. Cuando utilizamos algoritmos de clustering en el data set, surgen de entre los datos cosas inesperadas como estructuras, clusters o agrupaciones que un humano no se habría imaginado pero la máquina crea por nosotros.
+
+![](Figures/Clustering.png)
+
+<div align="center">## **K-Means**
+
+<div align="left">K-means agrupa objetos en k grupos basándose en sus características. El agrupamiento se realiza minimizando la suma de distancias entre cada objeto y el centroide de su grupo o cluster. Se suele usar la distancia cuadrática.
+
+![](Figures/KM1.png)
+![](Figures/KM_PasoAPaso.png)
+
+![](Figures/KM2.png)
+
+![](Figures/KM3.png)
+
+
+![](Figures/KM4.png)
+![](Figures/KM5.png)
+![](Figures/KM6.png)
+
+![](Figures/KM7.png)
+
+![](Figures/KM8.png)
+
+![](Figures/KM9.png)
+
+![](Figures/KM10.png)
+
+![](Figures/KM11.png)
+
+
+<div align="center">## **K-Means: La trampa de la inicialización aleatoria**
+
+![](Figures/KM12.png)
+
+<div align="center">*¿Y qué pasaría si elegimos una mala inicialización aleatoria del baricentro?*
+
+![](Figures/KM_PasoAPaso.png)
+
+![](Figures/KM13.png)
+
+![](Figures/KM14.png)
+![](Figures/KM15.png)
+![](Figures/KM16.png)
+
+<div align="center">## **K-Means: ¿Cómo elegir el número correcto de clusters?**
+
+![](Figures/KM17.png)
+
+<div align="center">La Suma de los Cuadrados de los Centros de los Clusters **WCSS (Within Cluster Sum of Squares)** representa una solución para la selección adecuada del número de clusters. 
+
+$$WCSS = \sum_{P_i \in Cluster 1} d(P_i, C_1)^2 + \sum_{P_i \in Cluster 2} d(P_i, C_2)^2 + \sum_{P_i \in Cluster 3} d(P_i, C_3)^2$$
+
+![](Figures/KM18.png)
+$$WCSS = \sum_{P_i \in Cluster 1} d(P_i, C_1)^2$$
+![](Figures/KM19.png)
+
+$$WCSS = \sum_{P_i \in Cluster 1} d(P_i, C_1)^2 + \sum_{P_i \in Cluster 2} d(P_i, C_2)^2$$
+
+![](Figures/KM20.png)
+$$WCSS = \sum_{P_i \in Cluster 1} d(P_i, C_1)^2 + \sum_{P_i \in Cluster 2} d(P_i, C_2)^2 + \sum_{P_i \in Cluster 3} d(P_i, C_3)^2$$
+
+![](Figures/KM21.png)
+
+
+
+
+<div align="center">## **K-Means: Aplicación**
+![](Figures/CC.jpg)
+```{r}
+# Clustering con K-means
+# Importar los datos
+dataset = read.csv('Mall_Customers.csv')
+head(dataset)
+```
+
+```{r}
+# Selección variables de interés
+X = dataset[, 4:5]
+```
+
+```{r}
+# Método del codo
+set.seed(6)
+wcss = vector()
+for (i in 1:10){
+  wcss[i] <- sum(kmeans(X, i)$withinss)
+}
+plot(1:10, wcss, type = 'b', main = "Método del codo",
+     xlab = "Número de clusters (k)", ylab = "WCSS(k)")
+```
+
+```{r}
+# Aplicar el algoritmo de k-means con k optimo
+set.seed(29)
+kmeans <- kmeans(X, 5, iter.max = 300, nstart = 10)
+```
+
+```{r}
+#Visualizacion de los clusters
+#install.packages("cluster")
+library(cluster)
+clusplot(X, 
+         kmeans$cluster,
+         lines = 0,
+         shade = TRUE,
+         color = TRUE,
+         labels = 2,
+         plotchar = FALSE,
+         span = TRUE,
+         main = "Clustering de clientes",
+         xlab = "Ingresos anuales",
+         ylab = "Puntuacion (1-100)"
+         )
+```
+
+<div align="center">## **Clustering Jerárquico**
+
+<div align="left">Es un método de análisis de grupos puntuales, que busca construir una jerarquía de grupos entre los elementos analizados. 
+
+Este método trata de crear grupos de elementos homogéneos entre sí y heterogéneos entre grupos, para conseguirlo principalmente se puede hacer mediante estrategia aglomerativa o divisitiva. 
+
+El agrupamiento jerárquico es capaz de fijar por si solo el número de clusters, por ello se puede utilizar de forma exploratoria y posteriormente aplicar un análisis no jerárquico con el número de clusters obtenido.
+
+![](Figures/Jerarquicos.JPG) 
+
+<div align="left">Los métodos **Jerárquicos** se dividen en dos grupos
+
+**Agglomerative clustering (bottom-up):** el agrupamiento se inicia en la base del árbol, donde cada observación forma un cluster individual. Los clusters se van combinado a medida que la estructura crece hasta converger en una única “rama” central.
+
+**Divisive clustering (top-down):** es la estrategia opuesta al agglomerative clustering, se inicia con todas las observaciones contenidas en un mismo cluster y luego suceden divisiones hasta que cada observación forma un cluster individual.
+
+![](Figures/Agglomerative-Divisive.JPG)
+<div align="center">## **Agglomerative**
+
+![](Figures/Pasos-Agg.JPG)
+<div align="left">### **Matriz de distancias**
+
+```{r message=FALSE, warning = FALSE}
+#install.packages("dendextend")
+#install.packages("factoextra")
+
+library(dendextend)
+library(factoextra)
+library(cluster)
+
+# Matriz de distancias euclídeas
+mat_dist <- dist(x = dataset, method = "euclidean")  # metodo: "maximum", "manhattan", "canberra", "binary" or "minkowski"
+fviz_dist(mat_dist, gradient = list(low = "blue", mid = "white", high = "red"), lab_size = 4)
+```
+
+<div align="left">### **Linkage**
+
+<div align="left">#### Completo o Máximo: 
+La mayor distancia entre todos los posibles pares formados por una observación del Cluster A y una del cluster B. Más conservadora
+
+![](Figures/Complete.PNG)
+
+
+```{r}
+# Dendograma con linkages complete usando libreria "dendextend"
+hc_euclidea_complete <- hclust(d = mat_dist, method = "complete")
+dend_modelo <- as.dendrogram(hc_euclidea_complete)
+plot(dend_modelo)
+```
+
+<div align="left">#### Promedio: 
+
+El promedio de las distancias entre todos los posibles pares formados por una observación del Cluster A y una del cluster B.
+
+![](Figures/average.PNG)
+
+```{r}
+#install.packages("factoextra")
+library(factoextra)
+
+# Dendograma con linkages average usando libreria "factoextra"
+hc_euclidea_average  <- hclust(d = mat_dist, method = "average")
+
+fviz_dend(x = hc_euclidea_average, cex = 0.6) +
+    labs(title = "Herarchical clustering",
+       subtitle = "Distancia euclídea, Linkage average")
+```
+
+Otras funcionalidades de fviz_dend
+
+```{r}
+fviz_dend(x = hc_euclidea_average, cex = 0.6, type = "circular") +
+    labs(title = "Herarchical clustering",
+       subtitle = "Distancia euclídea, Linkage average")
+```
+
+<div align="left">#### Centroide: 
+
+Distacia entre los centroides de los clusters.
+
+![](Figures/centroide.PNG)
+
+```{r}
+
+hc_euclidea_centroid  <- hclust(d = mat_dist, method = "centroid")
+
+fviz_dend(x = hc_euclidea_centroid, cex = 0.6) +
+    labs(title = "Herarchical clustering",
+       subtitle = "Distancia euclídea, Linkage centroide")
+```
+
+```{r}
+fviz_dend(x = hc_euclidea_average, cex = 0.4, horiz = TRUE) +
+    labs(title = "Herarchical clustering",
+       subtitle = "Distancia euclídea, Linkage average")
+```
+
+
+<div align="left">#### Ward: 
+
+Minimiza la suma total de la varianza dentro del cluster.
+
+![](Figures/SSE.PNG)
+
+```{r}
+hc_euclidea_ward  <- hclust(d = mat_dist, method = "ward.D2")
+
+dend_modelo <- as.dendrogram(hc_euclidea_ward)
+plot(dend_modelo)
+
+```
+
+
+<div align="left">### **Coeficiente de correlación entre distancias**
+
+Útil para comparar métodos ya que habla de si un dendograma resultante presenta relaciones aceptables al compararlo con la matriz de distancias originales
+
+```{r}
+# Correlación para Linkage completo
+cor(x = mat_dist, cophenetic(hc_euclidea_complete))
+```
+
+```{r}
+# Correlación para Linkage average
+cor(x = mat_dist, cophenetic(hc_euclidea_average))
+```
+
+```{r}
+# Correlación para Linkage centroide
+cor(x = mat_dist, cophenetic(hc_euclidea_centroid))
+```
+
+```{r}
+# Correlación para Linkage Ward
+cor(x = mat_dist, cophenetic(hc_euclidea_ward))
+```
+
+<div align="center">### **Número de Cluster **
+
+
+```{r}
+fviz_dend(x = hc_euclidea_average, k = 2, cex = 0.6) +
+  geom_hline(yintercept = 3, linetype = "dashed") +
+  labs(title = "Herarchical clustering",
+       subtitle = "Distancia euclídea, Linkage average, K=2")
+```
+       
+```{r}
+fviz_dend(x = hc_euclidea_average, k = 5, cex = 0.6) +
+  geom_hline(yintercept = 2, linetype = "dashed") +
+  labs(title = "Herarchical clustering",
+       subtitle = "Distancia euclídea, Lincage average, K=5")
+```
+
+```{r}
+
+# tabla de asignación por cluster
+cutree(hc_euclidea_average, h = 2)
+
+# Tamaño de cada cluster
+table(cutree(hc_euclidea_average, h = 2))
+
+```
+
+<div align="center">## **Divisive**
+
+Inicia con un único cluster que contiene todas las observaciones, a continuación, se va dividiendo hasta que cada observación forma un cluster independiente. En cada iteración, se selecciona el cluster y la mayor diferencia entre dos de sus observaciones.
+
+<div align="left">**DIANA: DIvisive ANAlysis Clustering**
+Algoritmo más usado para el método divisive, en este caso no hay Linkage
+
+```{r}
+library(cluster)
+hc_diana <- diana(x = mat_dist, diss = TRUE, stand = FALSE)
+
+fviz_dend(x = hc_diana, cex = 0.5) +
+  labs(title = "Hierarchical clustering divisivo",
+       subtitle = "Distancia euclídea")
+
+```
+
+```{r}
+# Correlación para Linkage average
+cor(x = mat_dist, cophenetic(hc_diana))
+
+```
+
+
+
+
